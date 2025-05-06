@@ -63,7 +63,7 @@ function generateSpecificQuestion(rootNote, notation) { const scale = calculateM
     }
 } const allOptions = shuffleArray([correctAnswer, ...incorrectOptions]); currentQuestionData = { questionText: `¿Cuál es la ${degreeName.toLowerCase()} nota de la escala de ${rootNoteName} Mayor?`, correctAnswer: correctAnswer, options: allOptions }; displayQuestion(); }
 // --- UI ---
-function updateUI() { keyButtonsDiv.innerHTML = ''; ALL_NOTES.filter((_, i) => [0, 2, 4, 5, 7, 9, 11].includes(i)).forEach(noteInfo => { const button = document.createElement('button'); button.textContent = formatNoteName(noteInfo, currentNotation); button.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out transform hover:scale-110 focus:ring-offset-slate-800'; /* Añadido focus:ring-offset */ /* Añadido focus:ring-offset */ button.dataset.noteLatin = noteInfo.latin; button.dataset.noteEnglish = noteInfo.english; button.addEventListener('click', handleKeySelection); keyButtonsDiv.appendChild(button); }); modeSelectionDiv.classList.toggle('hidden', currentQuizMode !== null); keySelectionDiv.classList.toggle('hidden', currentQuizMode === null || selectedRootNote !== null); quizAreaDiv.classList.toggle('hidden', selectedRootNote === null); learnEnglishSection.classList.add('hidden'); if (currentQuizMode === 'complete') {
+function updateUI() { keyButtonsDiv.innerHTML = ''; ALL_NOTES.filter((_, i) => [0, 2, 4, 5, 7, 9, 11].includes(i)).forEach(noteInfo => { const button = document.createElement('button'); button.textContent = formatNoteName(noteInfo, currentNotation); button.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out transform hover:scale-110 focus:ring-offset-slate-800'; button.dataset.noteLatin = noteInfo.latin; button.dataset.noteEnglish = noteInfo.english; button.addEventListener('click', handleKeySelection); keyButtonsDiv.appendChild(button); }); modeSelectionDiv.classList.toggle('hidden', currentQuizMode !== null); keySelectionDiv.classList.toggle('hidden', currentQuizMode === null || selectedRootNote !== null); quizAreaDiv.classList.toggle('hidden', selectedRootNote === null); learnEnglishSection.classList.add('hidden'); if (currentQuizMode === 'complete') {
     completeAnswerArea.classList.remove('hidden');
     specificAnswerArea.classList.add('hidden');
 }
@@ -110,7 +110,6 @@ function displayQuestion() {
         completeAnswerArea.classList.add('hidden');
         specificAnswerArea.classList.remove('hidden');
         specificAnswerArea.innerHTML = '';
-        // Colores directos para modo oscuro
         const buttonColorClasses = ['bg-red-600 hover:bg-red-500', 'bg-blue-600 hover:bg-blue-500', 'bg-green-600 hover:bg-green-500', 'bg-yellow-500 hover:bg-yellow-400', 'bg-purple-600 hover:bg-purple-500', 'bg-pink-600 hover:bg-pink-500',];
         currentQuestionData.options.forEach((option, index) => {
             const button = document.createElement('button');
@@ -118,7 +117,7 @@ function displayQuestion() {
             const colorClass = buttonColorClasses[index % buttonColorClasses.length];
             button.className = `font-semibold py-2 px-4 rounded shadow-md transition duration-150 ease-in-out transform hover:scale-105 ${colorClass}`;
             if (colorClass.includes('yellow')) {
-                button.classList.add('text-yellow-950'); // Texto oscuro para amarillo
+                button.classList.add('text-yellow-950');
             }
             else {
                 button.classList.add('text-white');
@@ -132,12 +131,17 @@ function displayQuestion() {
 function showFeedback(isCorrect) {
     if (!feedbackMessage || !correctSound || !incorrectSound || !appContainer)
         return;
-    const baseFeedbackClasses = "text-lg font-medium px-4 py-2 rounded-md w-full max-w-md border";
-    const message = isCorrect ? "¡Correcto! 🎉" : "Incorrecto. ¡Sigue intentando! 🤔";
-    feedbackMessage.textContent = message;
+    const baseFeedbackClasses = "text-lg font-medium text-gray-200 px-4 py-2 rounded-md w-full max-w-md border"; // Clases base del HTML
+    let messageContent = isCorrect ? "¡Correcto! 🎉" : "Incorrecto. ¡Sigue intentando! 🤔";
+    // Añadir la respuesta correcta si es incorrecto y en modo específico
+    if (!isCorrect && currentQuizMode === 'specific' && currentQuestionData) {
+        messageContent += ` La respuesta era: ${currentQuestionData.correctAnswer}`;
+    }
+    feedbackMessage.textContent = messageContent;
     feedbackMessage.className = `${baseFeedbackClasses} ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`;
+    // Aplicar animaciones al contenedor principal
     appContainer.classList.remove('correct-animation', 'shake-animation');
-    void appContainer.offsetWidth;
+    void appContainer.offsetWidth; // Forzar reflow para reiniciar animación
     if (isCorrect) {
         correctSound.play().catch(e => console.error("Error playing sound:", e));
         appContainer.classList.add('correct-animation');
@@ -145,10 +149,8 @@ function showFeedback(isCorrect) {
     else {
         incorrectSound.play().catch(e => console.error("Error playing sound:", e));
         appContainer.classList.add('shake-animation');
-        if (currentQuizMode === 'specific' && currentQuestionData) {
-            feedbackMessage.textContent += ` La respuesta era: ${currentQuestionData.correctAnswer}`;
-        }
     }
+    // Lógica de botones post-respuesta
     if (currentQuizMode === 'complete') {
         submitCompleteAnswerBtn.classList.add('hidden');
         submitCompleteAnswerBtn.disabled = true;
@@ -172,15 +174,17 @@ function showFeedback(isCorrect) {
         gobackSpecificBtn.classList.remove('hidden');
         nextQuestionBtn.focus();
     }
-    setTimeout(() => { appContainer.classList.remove('correct-animation', 'shake-animation'); }, 800);
+    // Limpiar animación después de que termine
+    setTimeout(() => {
+        appContainer.classList.remove('correct-animation', 'shake-animation');
+    }, 800); // Duración de la animación más larga
 }
 function clearFeedback() {
     if (!feedbackMessage)
         return;
     const baseFeedbackClasses = "text-lg font-medium px-4 py-2 rounded-md w-full max-w-md border";
     feedbackMessage.textContent = '';
-    // Texto por defecto para modo oscuro, borde transparente
-    feedbackMessage.className = `${baseFeedbackClasses} text-gray-300 border-transparent`;
+    feedbackMessage.className = `${baseFeedbackClasses} text-gray-400 border-transparent`; // Texto gris claro y borde transparente
 }
 // --- Handlers ---
 function handleNotationChange(event) { currentNotation = event.target.value; updateUI(); if (selectedRootNote && currentQuizMode) {
@@ -213,9 +217,9 @@ function handleSpecificAnswer(event) {
     const isCorrect = userAnswer === correctAnswer;
     const buttons = specificAnswerArea.querySelectorAll('button');
     buttons.forEach(btn => {
-        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-red-500', 'ring-green-500', 'ring-blue-400', 'ring-offset-slate-700', 'ring-offset-1'); // Clases simplificadas para modo oscuro
+        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-red-500', 'ring-green-500', 'ring-blue-400', 'ring-offset-slate-700', 'ring-offset-1');
         if (btn.dataset.answer === userAnswer) {
-            const ringColorClasses = isCorrect ? ['ring-green-500'] : ['ring-red-500']; // Solo color base del ring
+            const ringColorClasses = isCorrect ? ['ring-green-500'] : ['ring-red-500'];
             btn.classList.add('ring-2', 'ring-offset-2', 'ring-offset-slate-700', ...ringColorClasses);
         }
         if (!isCorrect && btn.dataset.answer === correctAnswer) {
