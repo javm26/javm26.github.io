@@ -1,0 +1,47 @@
+/* Estilos base o personalizados adicionales si son necesarios */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- CLASE BASE PARA BOTONES DE ACCIÓN (MODO OSCURO PERMANENTE) --- */
+@layer components {
+  .action-button {
+    @apply text-white font-bold py-3 text-lg rounded-lg shadow-lg transition duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800;
+    /* El color del ring se definirá por botón en el HTML */
+  }
+}
+
+/* Animación personalizada para respuesta incorrecta */
+@keyframes shake { /* ... */ }
+.shake-animation { animation: shake 0.5s ease-in-out; }
+
+/* Animación para respuesta correcta */
+@keyframes pulse-correct { /* ... */ }
+.correct-animation { animation: pulse-correct 0.8s ease-in-out; }
+
+/* Ocultar elementos */
+.hidden { display: none; }
+
+/* Estilos adicionales para botones activos o seleccionados si se desea */
+.selected-button {
+    @apply ring-2 ring-offset-2 ring-indigo-400 ring-offset-slate-800; /* Ajustado para modo oscuro */
+}
+
+/* --- Clases para feedback visual (MODO OSCURO PERMANENTE) --- */
+.feedback-correct {
+    @apply bg-green-600 text-green-50 border-green-700; /* Estilos oscuros directamente */
+}
+
+.feedback-incorrect {
+    @apply bg-red-600 text-red-50 border-red-700; /* Estilos oscuros directamente */
+}
+
+/* Estilos para inputs de escala completa (para consistencia con tema oscuro) */
+.scale-note-input {
+    @apply w-full border border-gray-600 rounded-md px-1 py-1.5 sm:py-2 text-center focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-gray-700 text-white placeholder-gray-400;
+}
+
+/* Estilos para etiquetas de números romanos (para consistencia) */
+.roman-num {
+    @apply text-center font-semibold text-xs sm:text-sm text-gray-400;
+}
